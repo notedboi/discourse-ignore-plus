@@ -6,7 +6,6 @@ export default apiInitializer("0.8", api => {
   if (!user) return;
   
   const ignored = user.ignored_users;
-   const ignored = ['david','pekka_gaiser'];
 
   if (ignored.length) {
     api.modifyClass("component:topic-list", {
