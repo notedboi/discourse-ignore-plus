@@ -1,1 +1,3 @@
-# discourse-hide-topic-from-ignored-users
+# Hide Topics From Ignored Users
+
+A Discourse theme component. Remove topics form ignored users
