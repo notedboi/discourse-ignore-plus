@@ -4,6 +4,9 @@ import { on } from "discourse-common/utils/decorators";
 export default apiInitializer("0.8", api => {
   const user = api.getCurrentUser();
   if (!user) return;
+
+  const site = api.container.lookup("site:main");
+  if (site.mobileView) return;
   
   const ignored = user.ignored_users;
 
