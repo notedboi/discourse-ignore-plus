@@ -43,6 +43,7 @@ export default apiInitializer("0.11.1", api => {
     pluginId: PLUGIN_ID,
     @discourseComputed()
     unboundClassNames() {
+      console.log(this)
       return addIgnoredTopicClass(this);
     }
   });
