@@ -1,6 +1,10 @@
 import {
   apiInitializer
 } from "discourse/lib/api";
+import {
+  on
+} from "discourse-common/utils/decorators";
+
 import discourseComputed from "discourse-common/utils/decorators";
 
 export default apiInitializer("0.11.1", api => {
@@ -20,8 +24,21 @@ export default apiInitializer("0.11.1", api => {
   }
 
   // get a list of ignored users
-  const ignored = user.ignored_users;
-  // const ignored = ['david', 'pekka_gaiser', 'sam', 'adopilot'];
+  // const ignored = user.ignored_users;
+  const ignored = ['david', 'pekka_gaiser', 'sam', 'adopilot'];
+
+  if (settings.filter_topics) {
+    api.modifyClass("component:topic-list", {
+      pluginId: PLUGIN_ID,
+      @on("didReceiveAttrs")
+      removeIgnoredUsers() {
+        const filtered = this.topics.filter(
+          topic => !ignored.includes(topic.posters[0].user.username)
+        );
+        this.set("topics", filtered);
+      }
+    });
+  }
 
   // helper function to avoid duplicating code
   const addIgnoredTopicClass = context => {
@@ -29,24 +46,32 @@ export default apiInitializer("0.11.1", api => {
     let classList = context._super(...arguments);
 
     // create your condition
-    const shouldAddClass = ignored.includes(
-      context.topic.posters[0].user.username
-    );
+    if (!settings.filter_topics) {
+      const shouldAddClass = ignored.includes(
+        context.topic.posters[0].user.username
+      );
 
-    // add ignored class if condition is true
-    if (shouldAddClass) {
-      classList += IGNORED_TOPIC_CLASS_STRING;
+      // add ignored class if condition is true
+      if (shouldAddClass) {
+        classList += IGNORED_TOPIC_CLASS_STRING;
+      }
     }
 
-    if (ignored.includes(
-        context.topic.last_poster_username
-      )) {
-      classList += IGNORED_AVATAR_CLASS_STRING;
+    if (settings.hide_ignored_lp_avatar) {
+      if (ignored.includes(
+          context.topic.last_poster_username
+        )) {
+        classList += IGNORED_AVATAR_CLASS_STRING;
+      }
     }
 
     // return the classList plus the modifications if any
     return classList;
   };
+
+  if (settings.filter_topics && !settings.hide_ignored_lp_avatar) {
+    return
+  }
 
   // add the class to the default topic list like on the "latest" page
   api.modifyClass("component:topic-list-item", {
@@ -66,4 +91,5 @@ export default apiInitializer("0.11.1", api => {
       return addIgnoredTopicClass(this);
     }
   });
+
 });

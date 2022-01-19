@@ -1,0 +1,11 @@
+filter_topics:
+  type: bool
+  default: true
+  description:
+    en: "Use filter mode (filter topics) instead of css mode (hide topics), unchecked to use css mode"
+
+hide_ignored_lp_avatar:
+  type: bool
+  default: false
+  description:
+    en: "Hide avatar if the last poster is an ignored user on mobile, only works on css mode"
