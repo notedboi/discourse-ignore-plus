@@ -1,49 +1,60 @@
-import {
-  apiInitializer
-} from "discourse/lib/api";
-import {
-  on
-} from "discourse-common/utils/decorators";
+import { apiInitializer } from "discourse/lib/api";
+import discourseComputed from "discourse-common/utils/decorators";
 
-export default apiInitializer("0.8", api => {
+export default apiInitializer("0.11.1", api => {
+  // set an id for your modifications
+  const PLUGIN_ID = "hide-ignored-op-topics";
+
+  // The class name you want to add. The space at the start is required
+  const IGNORED_TOPIC_CLASS_STRING = " ignored-op-topic";
+
+  // get current user
   const user = api.getCurrentUser();
-  if (!user) return;
 
-  // const ignored = user.ignored_users
+  // not logged in, bail
+  if (!user) {
+    return;
+  }
+
+  // get a list of ignored users
+  // const ignored = user.ignored_users;
 
   const ignored = ['david', 'pekka_gaiser', 'sam'];
 
-  if (ignored.length) {
-    //check isMobile
-    // const site = api.container.lookup("site:main");
+  // helper function to avoid duplicating code
+  const addIgnoredTopicClass = context => {
+    // get classes from core / other plugins and themes
+    let classList = context._super(...arguments);
 
-    // if (site.mobileView) return;
+    // create your condition
+    const shouldAddClass = ignored.includes(
+      context.topic.posters[0].user.username
+    );
 
-    api.modifyClass("component:topic-list", {
-      @on("didReceiveAttrs")
+    // add ignored class if condition is true
+    if (shouldAddClass) {
+      classList += IGNORED_TOPIC_CLASS_STRING;
+    }
 
-      // @on("didUpdateAttrs")
+    // return the classList plus the modifications if any
+    return classList;
+  };
 
-      // pluginId: 'ignore plus',
+  // add the class to the default topic list like on the "latest" page
+  api.modifyClass("component:topic-list-item", {
+    pluginId: PLUGIN_ID,
+    @discourseComputed()
+    unboundClassNames() {
+      return addIgnoredTopicClass(this);
+    }
+  });
 
-      removeIgnoredUsers() {
-        this.topics = this.topics.filter(
-          topic => !ignored.includes(topic.posters[0].user.username)
-        );
-
-     }
-   
-      
-    });
-
-    // api.modifyClass("component:mobile-category-topic", {
-    //   @on("didReceiveAttrs")
-    //   removeIgnoredUsers() {
-    //     console.log(this);
-    //     this.topics = this.topics.filter(
-    //       topic => !ignored.includes(topic.posters[0].user.username)
-    //     );
-    //   }
-    // });
-  }
+  // do the same for the categories page topic list
+  api.modifyClass("component:latest-topic-list-item", {
+    pluginId: PLUGIN_ID,
+    @discourseComputed()
+    unboundClassNames() {
+      return addIgnoredTopicClass(this);
+    }
+  });
 });
