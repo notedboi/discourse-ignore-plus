@@ -1,7 +1,8 @@
 /* we don't use display: none; here because we don't want to mess with load-more */
 .ignored-op-topic {
-  height: 0;
+  // force overwrite for topic thumbnail component
+  height: 0 !important;
+  position: fixed !important;
   width: 0;
-  position: fixed;
   bottom: -100vh;
 }
