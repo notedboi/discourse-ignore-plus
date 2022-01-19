@@ -24,8 +24,8 @@ export default apiInitializer("0.11.1", api => {
   }
 
   // get a list of ignored users
-  // const ignored = user.ignored_users;
-  const ignored = ['david', 'pekka_gaiser', 'sam', 'adopilot'];
+  const ignored = user.ignored_users;
+  // const ignored = ['david', 'pekka_gaiser', 'sam', 'adopilot'];
 
   if (settings.filter_topics) {
     api.modifyClass("component:topic-list", {
