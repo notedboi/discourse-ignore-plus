@@ -1,0 +1,7 @@
+/* we don't use display: none; here because we don't want to mess with load-more */
+.ignored-op-topic {
+  height: 0;
+  width: 0;
+  position: fixed;
+  bottom: 0;
+}
