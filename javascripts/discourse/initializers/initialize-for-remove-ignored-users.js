@@ -1,4 +1,6 @@
-import { apiInitializer } from "discourse/lib/api";
+import {
+  apiInitializer
+} from "discourse/lib/api";
 import discourseComputed from "discourse-common/utils/decorators";
 
 export default apiInitializer("0.11.1", api => {
@@ -7,6 +9,7 @@ export default apiInitializer("0.11.1", api => {
 
   // The class name you want to add. The space at the start is required
   const IGNORED_TOPIC_CLASS_STRING = " ignored-op-topic";
+  const IGNORED_AVATAR_CLASS_STRING = " ignored-lp-avatar";
 
   // get current user
   const user = api.getCurrentUser();
@@ -18,6 +21,7 @@ export default apiInitializer("0.11.1", api => {
 
   // get a list of ignored users
   const ignored = user.ignored_users;
+  // const ignored = ['david', 'pekka_gaiser', 'sam', 'adopilot'];
 
   // helper function to avoid duplicating code
   const addIgnoredTopicClass = context => {
@@ -34,6 +38,12 @@ export default apiInitializer("0.11.1", api => {
       classList += IGNORED_TOPIC_CLASS_STRING;
     }
 
+    if (ignored.includes(
+        context.topic.last_poster_username
+      )) {
+      classList += IGNORED_AVATAR_CLASS_STRING;
+    }
+
     // return the classList plus the modifications if any
     return classList;
   };
@@ -43,7 +53,7 @@ export default apiInitializer("0.11.1", api => {
     pluginId: PLUGIN_ID,
     @discourseComputed()
     unboundClassNames() {
-      console.log(this)
+      // console.log(this)
       return addIgnoredTopicClass(this);
     }
   });
