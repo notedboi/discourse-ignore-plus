@@ -56,9 +56,7 @@ export default apiInitializer("0.11.1", api => {
           }
 
           poster.extras += IGNORED_AVATAR_CLASS_STRING;
-
-          if (typeof myObj.prop2 === 'function';)
-            poster.user.set("extras", IGNORED_AVATAR_CLASS_STRING);
+          poster.user.set("extras", IGNORED_AVATAR_CLASS_STRING);
         }
       });
     }
