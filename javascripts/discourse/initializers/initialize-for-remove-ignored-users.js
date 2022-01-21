@@ -1,19 +1,17 @@
 import {
   apiInitializer
 } from "discourse/lib/api";
-import {
+import discourseComputed, {
   on
 } from "discourse-common/utils/decorators";
 
-import discourseComputed from "discourse-common/utils/decorators";
-
 export default apiInitializer("0.11.1", api => {
   // set an id for your modifications
-  const PLUGIN_ID = "hide-ignored-op-topics";
+  const PLUGIN_ID = "ignore-plus";
 
   // The class name you want to add. The space at the start is required
   const IGNORED_TOPIC_CLASS_STRING = " ignored-op-topic";
-  const IGNORED_AVATAR_CLASS_STRING = " ignored-lp-avatar";
+  const IGNORED_AVATAR_CLASS_STRING = " ignored-user-avatar";
 
   // get current user
   const user = api.getCurrentUser();
@@ -24,72 +22,69 @@ export default apiInitializer("0.11.1", api => {
   }
 
   // get a list of ignored users
-  const ignored = user.ignored_users;
-  // const ignored = ['david', 'pekka_gaiser', 'sam', 'adopilot'];
+  // const ignored = user.ignored_users;
+  const ignoredUsers = ['codinghorror', 'david', 'pekka_gaiser', 'sam', 'adopilot'];
 
-  if (settings.filter_topics) {
-    api.modifyClass("component:topic-list", {
-      pluginId: PLUGIN_ID,
-      @on("didReceiveAttrs")
-      removeIgnoredUsers() {
-        const filtered = this.topics.filter(
-          topic => !ignored.includes(topic.posters[0].user.username)
-        );
-        this.set("topics", filtered);
-      }
-    });
+  //check if user is ignored
+  function isIgnoredUser(poster) {
+    return ignoredUsers.includes(poster.user.username);
   }
 
-  // helper function to avoid duplicating code
-  const addIgnoredTopicClass = context => {
-    // get classes from core / other plugins and themes
-    let classList = context._super(...arguments);
+  function addIgnoredTopicClass() {
+    let classList = this._super(...arguments);
 
-    // create your condition
-    if (!settings.filter_topics) {
-      const shouldAddClass = ignored.includes(
-        context.topic.posters[0].user.username
-      );
+    const topicCreator = this.topic.posters[0];
 
-      // add ignored class if condition is true
-      if (shouldAddClass) {
-        classList += IGNORED_TOPIC_CLASS_STRING;
-      }
+    if (isIgnoredUser(topicCreator)) {
+      classList += IGNORED_TOPIC_CLASS_STRING;
     }
 
-    if (settings.hide_ignored_lp_avatar) {
-      if (ignored.includes(
-          context.topic.last_poster_username
-        )) {
-        classList += IGNORED_AVATAR_CLASS_STRING;
-      }
-    }
-
-    // return the classList plus the modifications if any
     return classList;
-  };
+  }
 
-  if (settings.filter_topics && !settings.hide_ignored_lp_avatar) {
-    return
+  function addIgnoredAvatarClass() {
+    if (settings.hide_ignored_users_avatar) {
+      this.topic.posters.forEach((poster) => {
+        if (isIgnoredUser(poster)) {
+          // default raw topic-lists
+          poster.extras += IGNORED_AVATAR_CLASS_STRING;
+
+          // categories page topic lists
+          poster.user.set("extras", IGNORED_AVATAR_CLASS_STRING);
+        }
+      });
+    }
   }
 
   // add the class to the default topic list like on the "latest" page
   api.modifyClass("component:topic-list-item", {
     pluginId: PLUGIN_ID,
+
     @discourseComputed()
     unboundClassNames() {
-      // console.log(this)
-      return addIgnoredTopicClass(this);
-    }
+      return addIgnoredTopicClass.call(this);
+    },
+
+    @on("didReceiveAttrs")
+    ignoredAvatarClass() {
+      addIgnoredAvatarClass.call(this);
+    },
   });
 
   // do the same for the categories page topic list
+
   api.modifyClass("component:latest-topic-list-item", {
     pluginId: PLUGIN_ID,
+
     @discourseComputed()
     unboundClassNames() {
-      return addIgnoredTopicClass(this);
-    }
+      return addIgnoredTopicClass.call(this);
+    },
+
+    @on("didReceiveAttrs")
+    ignoredAvatarClass() {
+      addIgnoredAvatarClass.call(this);
+    },
   });
 
 });
