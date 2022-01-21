@@ -22,8 +22,8 @@ export default apiInitializer("0.11.1", api => {
   }
 
   // get a list of ignored users
-  // const ignored = user.ignored_users;
-  const ignoredUsers = ['codinghorror', 'david', 'pekka_gaiser', 'sam', 'adopilot'];
+  const ignoredUsers = user.ignored_users;
+  // const ignoredUsers = ['codinghorror', 'david', 'pekka_gaiser', 'sam', 'adopilot'];
 
   //check if user is ignored
   function isIgnoredUser(poster) {
