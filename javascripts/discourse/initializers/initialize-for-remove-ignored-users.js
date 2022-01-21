@@ -25,6 +25,10 @@ export default apiInitializer("0.11.1", api => {
   const ignoredUsers = user.ignored_users;
   // const ignoredUsers = ['codinghorror', 'david', 'pekka_gaiser', 'sam', 'adopilot'];
 
+  if (!ignoredUsers?.length) {
+    return
+  }
+
   //check if user is ignored
   function isIgnoredUser(poster) {
     return ignoredUsers.includes(poster.user.username);
@@ -46,11 +50,15 @@ export default apiInitializer("0.11.1", api => {
     if (settings.hide_ignored_users_avatar) {
       this.topic.posters.forEach((poster) => {
         if (isIgnoredUser(poster)) {
-          // default raw topic-lists
+
+          if (typeof poster?.user?.set !== 'function') {
+            return
+          }
+
           poster.extras += IGNORED_AVATAR_CLASS_STRING;
 
-          // categories page topic lists
-          poster.user.set("extras", IGNORED_AVATAR_CLASS_STRING);
+          if (typeof myObj.prop2 === 'function';)
+            poster.user.set("extras", IGNORED_AVATAR_CLASS_STRING);
         }
       });
     }
